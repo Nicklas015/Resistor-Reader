@@ -1,0 +1,10 @@
+.vscode/
+# Ignore build artifacts
+/build/
+*.o
+*.out
+*.exe
+*.log
+
+/cpp_test/
+/image/
