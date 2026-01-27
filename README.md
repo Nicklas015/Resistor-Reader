@@ -1,3 +1,5 @@
+# Version 1
+
 # Resistor-Reader
 This project aim to make a smart reader of resistor components. 
 
