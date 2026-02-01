@@ -21,14 +21,11 @@ bool is_horizontal(const std::vector<line>& lines) {
     return spreadX > spreadY;   // TRUE = horizontal resistor
 }
 
-bool orientation(const std::vector<line>& lines) {
-    if (lines.size() < 3) return true;
-
-    bool horizontal = is_horizontal(lines);
+bool orientation(const std::vector<line>& lines, bool is_horizontal) {
 
     std::vector<line> sorted = lines;
 
-    if (horizontal) {
+    if (is_horizontal) {
         std::sort(sorted.begin(), sorted.end(),
                   [](const line& a, const line& b) {
                       return a.position.x < b.position.x;
@@ -42,7 +39,7 @@ bool orientation(const std::vector<line>& lines) {
 
     int startGap, endGap;
 
-    if (horizontal) {
+    if (is_horizontal) {
         startGap = std::abs(sorted[1].position.x - sorted[0].position.x);
         endGap   = std::abs(sorted.back().position.x -
                             sorted[sorted.size() - 2].position.x);
@@ -52,16 +49,11 @@ bool orientation(const std::vector<line>& lines) {
                             sorted[sorted.size() - 2].position.y);
     }
 
-    // If the END gap is bigger → tolerance is at end → forward
     if (endGap > startGap)
         return false;
 
-    // Otherwise tolerance is at start → reverse
     return true;
 }
-
-
-
 
 //Removes Cluster detections of the same color band X positions
 std::vector<line> cluster_by_x(std::vector<line> lines, int threshold) {
