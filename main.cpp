@@ -12,7 +12,7 @@ std::vector<line> resistor_lines;
 std::vector<std::string> band_positions;
 
 int main() {
-  cv::Mat target = cv::imread("image/test5.png");
+  cv::Mat target = cv::imread("image/test8.png");
 
   cv::Mat background;
   target.copyTo(background);
@@ -21,22 +21,24 @@ int main() {
 
   cv::rectangle(target, cv::Point(0, 0), cv::Point(640, 30), (0, 0, 0), cv::FILLED);
 
-  Getlines(resistor_lines, target, YELLOW_RANGE.low, YELLOW_RANGE.high, Color::YELLOW);
-  Getlines(resistor_lines, target, BLUE_RANGE.low, BLUE_RANGE.high, Color::BLUE);
-  Getlines(resistor_lines, target, RED_RANGE.low, RED_RANGE.high, Color::RED);
-  Getlines(resistor_lines, target, GREEN_RANGE.low, GREEN_RANGE.high, Color::GREEN);
-  Getlines(resistor_lines, target, PURPLE_RANGE.low, PURPLE_RANGE.high, Color::PURPLE);
-  Getlines(resistor_lines, target, ORANGE_RANGE.low, ORANGE_RANGE.high, Color::ORANGE);
-  Getlines(resistor_lines, target, BLACK_RANGE.low, BLACK_RANGE.high, Color::BLACK);
-  Getlines(resistor_lines, target, GOLD_RANGE.low, GOLD_RANGE.high, Color::GOLD);
+  get_lines(resistor_lines, target, YELLOW_RANGE.low, YELLOW_RANGE.high, Color::YELLOW);
+  get_lines(resistor_lines, target, BLUE_RANGE.low, BLUE_RANGE.high, Color::BLUE);
+  get_lines(resistor_lines, target, RED_RANGE.low, RED_RANGE.high, Color::RED);
+  get_lines(resistor_lines, target, GREEN_RANGE.low, GREEN_RANGE.high, Color::GREEN);
+  get_lines(resistor_lines, target, PURPLE_RANGE.low, PURPLE_RANGE.high, Color::PURPLE);
+  get_lines(resistor_lines, target, ORANGE_RANGE.low, ORANGE_RANGE.high, Color::ORANGE);
+  get_lines(resistor_lines, target, BLACK_RANGE.low, BLACK_RANGE.high, Color::BLACK);
+  get_lines(resistor_lines, target, GOLD_RANGE.low, GOLD_RANGE.high, Color::GOLD);
   
-  bool horizontal = isHorizontal(resistor_lines);
-
+  bool horizontal = is_horizontal(resistor_lines);
+  bool forward = orientation(resistor_lines);
+  std::cout << "orientation: " << forward << "\n";
+ 
   if (horizontal) {
-    resistor_lines = clusterByX(resistor_lines, 50);
+    resistor_lines = cluster_by_x(resistor_lines, 50);
     std::cout << "is horizontal" << "\n";
   } else {
-    resistor_lines = clusterByY(resistor_lines, 50);
+    resistor_lines = cluster_by_y(resistor_lines, 50);
     std::cout << "is vertical" << "\n";
   }  
   for (auto &ln : resistor_lines) {
@@ -46,10 +48,16 @@ int main() {
 
       band_positions.push_back(ColorToString(ln.color));
   }
+
+ // bool forward = orientation(resistor_lines);
+  
+  if (!forward) {
+      std::reverse(band_positions.begin(), band_positions.end());
+  } 
   
   get_resistor_value(band_positions);
 
-  drawlines(resistor_lines, background);
+  draw_lines(resistor_lines, background);
 
   cv::imshow("contours", background);
 

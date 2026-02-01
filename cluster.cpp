@@ -4,7 +4,7 @@
 #include <cmath>
 #include <iostream>
 
-bool isHorizontal(const std::vector<line>& lines) {
+bool is_horizontal(const std::vector<line>& lines) {
     int minX = 999999, maxX = -1;
     int minY = 999999, maxY = -1;
 
@@ -21,7 +21,50 @@ bool isHorizontal(const std::vector<line>& lines) {
     return spreadX > spreadY;   // TRUE = horizontal resistor
 }
 
-std::vector<line> clusterByX(std::vector<line> lines, int threshold) {
+bool orientation(const std::vector<line>& lines) {
+    if (lines.size() < 3) return true;
+
+    bool horizontal = is_horizontal(lines);
+
+    std::vector<line> sorted = lines;
+
+    if (horizontal) {
+        std::sort(sorted.begin(), sorted.end(),
+                  [](const line& a, const line& b) {
+                      return a.position.x < b.position.x;
+                  });
+    } else {
+        std::sort(sorted.begin(), sorted.end(),
+                  [](const line& a, const line& b) {
+                      return a.position.y < b.position.y;
+                  });
+    }
+
+    int startGap, endGap;
+
+    if (horizontal) {
+        startGap = std::abs(sorted[1].position.x - sorted[0].position.x);
+        endGap   = std::abs(sorted.back().position.x -
+                            sorted[sorted.size() - 2].position.x);
+    } else {
+        startGap = std::abs(sorted[1].position.y - sorted[0].position.y);
+        endGap   = std::abs(sorted.back().position.y -
+                            sorted[sorted.size() - 2].position.y);
+    }
+
+    // If the END gap is bigger → tolerance is at end → forward
+    if (endGap > startGap)
+        return false;
+
+    // Otherwise tolerance is at start → reverse
+    return true;
+}
+
+
+
+
+//Removes Cluster detections of the same color band X positions
+std::vector<line> cluster_by_x(std::vector<line> lines, int threshold) {
     if (lines.empty()) return {};
 
     std::sort(lines.begin(), lines.end(),
@@ -48,7 +91,8 @@ std::vector<line> clusterByX(std::vector<line> lines, int threshold) {
     return groups;
 }
 
-std::vector<line> clusterByY(std::vector<line> lines, int threshold) {
+//Removes Cluster detections of the same color band X positions
+std::vector<line> cluster_by_y(std::vector<line> lines, int threshold) {
     if (lines.empty()) return {};
 
     std::sort(lines.begin(), lines.end(),

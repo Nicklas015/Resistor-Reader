@@ -12,7 +12,7 @@ line::line(Color color, cv::Rect rect, int x, int y){
     this->position = cv::Point(x, y);
 }
 
-void Getlines(std::vector<line>& lines, cv::Mat img, cv::Scalar low, cv::Scalar high, Color color) {
+void get_lines(std::vector<line>& lines, cv::Mat img, cv::Scalar low, cv::Scalar high, Color color) {
   cv::Mat mask;
   cv::inRange(img, low, high, mask);
   std::vector<std::vector<cv::Point> > contours;
@@ -27,7 +27,7 @@ void Getlines(std::vector<line>& lines, cv::Mat img, cv::Scalar low, cv::Scalar 
   }
 }
 
-void drawlines(std::vector<line>& lines, cv::Mat background) {
+void draw_lines(std::vector<line>& lines, cv::Mat background) {
   for (size_t i = 0; i < lines.size(); i++) {
     switch (lines[i].color) {
       case RED:
