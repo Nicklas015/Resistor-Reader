@@ -15,5 +15,6 @@ public:
  
 };
 
+void get_all_lines(std::vector<line>& lines, cv::Mat img);
 void get_lines(std::vector<line>& lines, cv::Mat img, cv::Scalar low, cv::Scalar high, Color color);
 void draw_lines(std::vector<line>& lines, cv::Mat background);

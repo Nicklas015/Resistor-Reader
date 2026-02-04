@@ -13,11 +13,9 @@ inline const char* ColorToString(Color c) {
         case ORANGE: return "ORANGE";
         case BLACK: return "BLACK";
         case GOLD: return "GOLD";
-
         default:     return "UNKNOWN";
     }
 }
-
 
 struct ColorRange {
     cv::Scalar low;
