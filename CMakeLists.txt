@@ -1,79 +1,51 @@
 cmake_minimum_required(VERSION 3.20)
 project(ResistorReader)
-# Tving arkitekturen til ARMv6 (Pi Zero)
-add_compile_options(-mcpu=arm1176jzf-s -mfpu=vfp -mfloat-abi=hard -marm)
-add_link_options(-mcpu=arm1176jzf-s -mfpu=vfp -mfloat-abi=hard -marm)
 
-
-# Standarder
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Tjek for toolchain fil
-if(NOT CMAKE_TOOLCHAIN_FILE)
-    message(FATAL_ERROR "Please specify your toolchain file with -DCMAKE_TOOLCHAIN_FILE=toolchains/rpi-zero.cmake")
-endif()
-
 # ------------------------------
-# Include directories
+# Include & OpenCV Setup
 # ------------------------------
-# Bemærk: Vi bruger CMAKE_SYSROOT som base for at ramme din Raspberry Pi rootfs
-include_directories(
-    ${CMAKE_SYSROOT}/usr/include
-    ${CMAKE_SYSROOT}/usr/include/opencv4
-)
-
-# ------------------------------
-# Source files
-# ------------------------------
-set(SOURCES
-    main.cpp
-    color.cpp
-    line.cpp
-    cluster.cpp
-    resistor_value.cpp
-)
-
-# ------------------------------
-# Find OpenCV
-# ------------------------------
-# Fortæller CMake præcis hvor OpenCV konfigurationen ligger i din sysroot
-set(OpenCV_DIR ${CMAKE_SYSROOT}/usr/lib/arm-linux-gnueabihf/cmake/opencv4)
+include_directories(SYSTEM $ENV{HOME}/Resistor-Reader/rootfs/usr/include/opencv4)
+set(OpenCV_DIR $ENV{HOME}/Resistor-Reader/rootfs/usr/lib/arm-linux-gnueabihf/cmake/opencv4)
 find_package(OpenCV REQUIRED)
 
 # ------------------------------
-# Find biblioteker i sysroot (BLAS, LAPACK, Armadillo)
+# Find math libs in sysroot
 # ------------------------------
-# Vi bruger NO_DEFAULT_PATH for at sikre, at vi IKKE linker mod din PC's egne biblioteker
-find_library(BLAS_LIB NAMES blas PATHS ${CMAKE_SYSROOT}/usr/lib/arm-linux-gnueabihf NO_DEFAULT_PATH)
-find_library(LAPACK_LIB NAMES lapack PATHS ${CMAKE_SYSROOT}/usr/lib/arm-linux-gnueabihf NO_DEFAULT_PATH)
-find_library(ARMADILLO_LIB NAMES armadillo PATHS ${CMAKE_SYSROOT}/usr/lib/arm-linux-gnueabihf NO_DEFAULT_PATH)
-find_library(ARPACK_LIB NAMES arpack PATHS ${CMAKE_SYSROOT}/usr/lib/arm-linux-gnueabihf NO_DEFAULT_PATH)
+find_library(BLAS_LIB NAMES blas PATHS $ENV{HOME}/Resistor-Reader/rootfs/usr/lib/arm-linux-gnueabihf NO_DEFAULT_PATH)
+find_library(LAPACK_LIB NAMES lapack PATHS $ENV{HOME}/Resistor-Reader/rootfs/usr/lib/arm-linux-gnueabihf NO_DEFAULT_PATH)
+find_library(ARMADILLO_LIB NAMES armadillo PATHS $ENV{HOME}/Resistor-Reader/rootfs/usr/lib/arm-linux-gnueabihf NO_DEFAULT_PATH)
+find_library(ARPACK_LIB NAMES arpack PATHS $ENV{HOME}/Resistor-Reader/rootfs/usr/lib/arm-linux-gnueabihf NO_DEFAULT_PATH)
 
-# Sikkerhedstjek: Stop hvis bibliotekerne mangler i din rootfs
-if(NOT BLAS_LIB OR NOT LAPACK_LIB OR NOT ARMADILLO_LIB)
-    message(FATAL_ERROR "Kunne ikke finde BLAS, LAPACK eller Armadillo i sysroot!\n"
-            "Tjek om de findes i: ${CMAKE_SYSROOT}/usr/lib/arm-linux-gnueabihf/\n"
-            "Husk at der skal være en .so fil (f.eks. libblas.so)")
+# Optional: fail early if missing
+if(NOT BLAS_LIB OR NOT LAPACK_LIB)
+    message(FATAL_ERROR "BLAS/LAPACK not found in sysroot")
 endif()
 
 # ------------------------------
-# Create executable
+# Build Executable
 # ------------------------------
-add_executable(resistor-reader ${SOURCES})
+add_executable(resistor-reader 
+    main.cpp color.cpp line.cpp cluster.cpp resistor_value.cpp
+)
+
+target_link_options(resistor-reader PRIVATE
+    "--sysroot=$ENV{HOME}/Resistor-Reader/rootfs"
+    "-B$ENV{HOME}/Resistor-Reader/rootfs/usr/lib/arm-linux-gnueabihf"
+    "-L$ENV{HOME}/Resistor-Reader/rootfs/usr/lib/arm-linux-gnueabihf"
+    "-Wl,-rpath-link,$ENV{HOME}/Resistor-Reader/rootfs/usr/lib/arm-linux-gnueabihf"
+    "-Wl,-rpath-link,$ENV{HOME}/Resistor-Reader/rootfs/lib/arm-linux-gnueabihf"
+)
 
 target_link_libraries(resistor-reader
     ${OpenCV_LIBS}
     ${ARMADILLO_LIB}
-    ${ARPACK_LIB}      # Tilføjet
+    ${ARPACK_LIB}
     ${BLAS_LIB}
     ${LAPACK_LIB}
     m
     pthread
-    dl                 # Tilføjet (nødvendig for nogle BLAS versioner)
-)
-
-# Dette tvinger linkeren til at lede efter OpenCV's afhængigheder i din rootfs
-set_target_properties(resistor-reader PROPERTIES 
-    LINK_FLAGS "-Wl,-rpath-link,${CMAKE_SYSROOT}/usr/lib/arm-linux-gnueabihf"
+    dl
 )
