@@ -1,28 +1,79 @@
-# Specify the minimum version of CMake required
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.20)
+project(ResistorReader)
+# Tving arkitekturen til ARMv6 (Pi Zero)
+add_compile_options(-mcpu=arm1176jzf-s -mfpu=vfp -mfloat-abi=hard -marm)
+add_link_options(-mcpu=arm1176jzf-s -mfpu=vfp -mfloat-abi=hard -marm)
 
-# Define the project name
-project(cmake_hello_world_test)
 
-# Enable verbose output during the build process
-# This is useful for debugging build issues
-set(CMAKE_VERBOSE_MAKEFILE ON)
-
-# Set the C++ standard to C++17
-# This ensures that C++17 features are available for the project
+# Standarder
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Define the executable target
-# This creates an executable named 'cmake_hello_world_test' from the 'main.cpp' source file
-add_executable(cmake_hello_world_test main.cpp)
+# Tjek for toolchain fil
+if(NOT CMAKE_TOOLCHAIN_FILE)
+    message(FATAL_ERROR "Please specify your toolchain file with -DCMAKE_TOOLCHAIN_FILE=toolchains/rpi-zero.cmake")
+endif()
 
-# Optional: Add include directories if needed
-# include_directories(include)
+# ------------------------------
+# Include directories
+# ------------------------------
+# Bemærk: Vi bruger CMAKE_SYSROOT som base for at ramme din Raspberry Pi rootfs
+include_directories(
+    ${CMAKE_SYSROOT}/usr/include
+    ${CMAKE_SYSROOT}/usr/include/opencv4
+)
 
-# Optional: Link libraries if needed
-# target_link_libraries(cmake_hello_world_test some_library)
+# ------------------------------
+# Source files
+# ------------------------------
+set(SOURCES
+    main.cpp
+    color.cpp
+    line.cpp
+    cluster.cpp
+    resistor_value.cpp
+)
 
-# Optional: Set compile options if needed
-# target_compile_options(cmake_hello_world_test PRIVATE -Wall -Wextra)
+# ------------------------------
+# Find OpenCV
+# ------------------------------
+# Fortæller CMake præcis hvor OpenCV konfigurationen ligger i din sysroot
+set(OpenCV_DIR ${CMAKE_SYSROOT}/usr/lib/arm-linux-gnueabihf/cmake/opencv4)
+find_package(OpenCV REQUIRED)
+
+# ------------------------------
+# Find biblioteker i sysroot (BLAS, LAPACK, Armadillo)
+# ------------------------------
+# Vi bruger NO_DEFAULT_PATH for at sikre, at vi IKKE linker mod din PC's egne biblioteker
+find_library(BLAS_LIB NAMES blas PATHS ${CMAKE_SYSROOT}/usr/lib/arm-linux-gnueabihf NO_DEFAULT_PATH)
+find_library(LAPACK_LIB NAMES lapack PATHS ${CMAKE_SYSROOT}/usr/lib/arm-linux-gnueabihf NO_DEFAULT_PATH)
+find_library(ARMADILLO_LIB NAMES armadillo PATHS ${CMAKE_SYSROOT}/usr/lib/arm-linux-gnueabihf NO_DEFAULT_PATH)
+find_library(ARPACK_LIB NAMES arpack PATHS ${CMAKE_SYSROOT}/usr/lib/arm-linux-gnueabihf NO_DEFAULT_PATH)
+
+# Sikkerhedstjek: Stop hvis bibliotekerne mangler i din rootfs
+if(NOT BLAS_LIB OR NOT LAPACK_LIB OR NOT ARMADILLO_LIB)
+    message(FATAL_ERROR "Kunne ikke finde BLAS, LAPACK eller Armadillo i sysroot!\n"
+            "Tjek om de findes i: ${CMAKE_SYSROOT}/usr/lib/arm-linux-gnueabihf/\n"
+            "Husk at der skal være en .so fil (f.eks. libblas.so)")
+endif()
+
+# ------------------------------
+# Create executable
+# ------------------------------
+add_executable(resistor-reader ${SOURCES})
+
+target_link_libraries(resistor-reader
+    ${OpenCV_LIBS}
+    ${ARMADILLO_LIB}
+    ${ARPACK_LIB}      # Tilføjet
+    ${BLAS_LIB}
+    ${LAPACK_LIB}
+    m
+    pthread
+    dl                 # Tilføjet (nødvendig for nogle BLAS versioner)
+)
+
+# Dette tvinger linkeren til at lede efter OpenCV's afhængigheder i din rootfs
+set_target_properties(resistor-reader PROPERTIES 
+    LINK_FLAGS "-Wl,-rpath-link,${CMAKE_SYSROOT}/usr/lib/arm-linux-gnueabihf"
+)

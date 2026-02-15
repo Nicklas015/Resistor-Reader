@@ -1,22 +1,62 @@
-// Include necessary header files
-#include <iostream>  // For input/output operations
+// main.cpp
+#include <iostream>
+#include <opencv2/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 
-// Using the standard namespace (Note: generally not recommended in larger projects)
-using namespace std;
+#include "cluster.h"
+#include "color.h"
+#include "line.h"
+#include "resistor_value.h"
+
+std::vector<line> resistor_lines;
+std::vector<std::string> band_positions;
 
 int main() {
-    // Demonstrating an if statement with an init-statement (C++17 feature)
-    // The init-statement allows you to declare and initialize a variable
-    // that is scoped to the if-else block
-    if (int a = 5; a < 8) {
-        // This block executes if 'a' is less than 8
-        cout << "Local variable aAAAAaaa is < 8\n";
-    } else {
-        // This block executes if 'a' is greater than or equal to 8
-        // Note: In this case, this block will never execute because 'a' is always 5
-        cout << "Local variable aAAAAAaa is >= 8\n";
-    }
+  cv::Mat target = cv::imread("image/test6.png");
+  cv::Mat background;
+  target.copyTo(background);
 
-    // Return 0 to indicate successful program execution
-    return 0;
+  cv::cvtColor(target, target, cv::COLOR_BGR2HSV);
+  cv::rectangle(target, cv::Point(0, 0), cv::Point(640, 30), (0, 0, 0), cv::FILLED);
+
+  get_all_lines(resistor_lines, target);
+
+  bool horizontal = is_horizontal(resistor_lines);
+  bool forward = orientation(resistor_lines, horizontal);
+  std::cout << "orientation: " << forward << "\n";
+
+  if (horizontal) {
+    resistor_lines = cluster_by_x(resistor_lines, 50);
+    std::cout << "is horizontal" << "\n";
+  } else {
+    resistor_lines = cluster_by_y(resistor_lines, 50);
+    std::cout << "is vertical" << "\n";
+  }
+
+  for (auto &ln : resistor_lines) {
+    std::cout << "Band: " << ColorToString(ln.color) << " at X=" << ln.position.x
+              << " at Y=" << ln.position.y << "\n";
+
+    band_positions.push_back(ColorToString(ln.color));
+  }
+
+  if (!forward) {
+    std::reverse(band_positions.begin(), band_positions.end());
+  }
+
+  get_resistor_value(band_positions);
+  draw_lines(resistor_lines, background);
+
+  /*cv::imshow("contours", background);
+
+  // Wait until the window is closed
+  while (true) {
+    int key = cv::waitKey(30);  // wait 30ms for key press
+
+    if (key >= 0 || cv::getWindowProperty("contours", cv::WND_PROP_VISIBLE) < 1) break;
+  }
+
+  cv::destroyAllWindows();*/
+
+  return 0;
 }
