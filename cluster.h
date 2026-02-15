@@ -3,7 +3,8 @@
 #include <vector>
 #include "line.h"
 
-std::vector<line> clusterByX(std::vector<line> lines, int threshold);
-std::vector<line> clusterByY(std::vector<line> lines, int threshold);
+std::vector<line> cluster_by_x(std::vector<line> lines, int threshold);
+std::vector<line> cluster_by_y(std::vector<line> lines, int threshold);
 
-bool isHorizontal(const std::vector<line>& lines);
+bool is_horizontal(const std::vector<line>& lines);
+bool orientation(const std::vector<line>& lines, bool is_horizontal);
