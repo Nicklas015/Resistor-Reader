@@ -1,6 +1,7 @@
 .vscode/
 # Ignore build artifacts
 /build/
+/build-rpi/
 *.o
 *.out
 *.exe
@@ -8,3 +9,7 @@
 
 /cpp_test/
 /image/
+
+/rootfs/
+/tools/
+/sysroot-relativelinks.py
