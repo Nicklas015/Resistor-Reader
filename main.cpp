@@ -12,7 +12,7 @@ std::vector<line> resistor_lines;
 std::vector<std::string> band_positions;
 
 int main() {
-  cv::Mat target = cv::imread("image/test6.png");
+  cv::Mat target = cv::imread("image/test2.png");
   cv::Mat background;
   target.copyTo(background);
 
@@ -47,7 +47,7 @@ int main() {
   get_resistor_value(band_positions);
   draw_lines(resistor_lines, background);
 
-  /*cv::imshow("contours", background);
+  cv::imshow("contours", background);
 
   // Wait until the window is closed
   while (true) {
@@ -56,7 +56,7 @@ int main() {
     if (key >= 0 || cv::getWindowProperty("contours", cv::WND_PROP_VISIBLE) < 1) break;
   }
 
-  cv::destroyAllWindows();*/
+  cv::destroyAllWindows();
 
   return 0;
 }
