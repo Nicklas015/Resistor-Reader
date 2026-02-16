@@ -11,6 +11,7 @@ add_executable(color_reader
     line.cpp
     cluster.cpp
     resistor_value.cpp
+    take_photo.cpp
 )
 
 target_link_libraries(color_reader ${OpenCV_LIBS})
