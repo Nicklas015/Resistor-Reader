@@ -12,7 +12,7 @@ std::vector<line> resistor_lines;
 std::vector<std::string> band_positions;
 
 int main() {
-  cv::Mat target = cv::imread("image/test2.png");
+  cv::Mat target = cv::imread("image/test8.png");
   cv::Mat background;
   target.copyTo(background);
 
@@ -22,8 +22,6 @@ int main() {
   get_all_lines(resistor_lines, target);
 
   bool horizontal = is_horizontal(resistor_lines);
-  bool forward = orientation(resistor_lines, horizontal);
-  std::cout << "orientation: " << forward << "\n";
 
   if (horizontal) {
     resistor_lines = cluster_by_x(resistor_lines, 50);
@@ -32,6 +30,9 @@ int main() {
     resistor_lines = cluster_by_y(resistor_lines, 50);
     std::cout << "is vertical" << "\n";
   }
+
+  bool forward = orientation(resistor_lines, horizontal);
+  std::cout << "orientation: " << forward << "\n";
 
   for (auto &ln : resistor_lines) {
     std::cout << "Band: " << ColorToString(ln.color) << " at X=" << ln.position.x

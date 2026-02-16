@@ -4,7 +4,7 @@
 #include <iostream>
 #include "cluster.h"
 
-bool is_horizontal(const std::vector<line>& lines) {
+bool  is_horizontal(const std::vector<line>& lines) {
   int minX = 999999, maxX = -1;
   int minY = 999999, maxY = -1;
 
@@ -40,6 +40,8 @@ bool orientation(const std::vector<line>& lines, bool is_horizontal) {
     startGap = std::abs(sorted[1].position.x - sorted[0].position.x);
     endGap = std::abs(sorted.back().position.x -
                       sorted[sorted.size() - 2].position.x);
+
+    std::cout << "startGap: " << startGap << " endGap: " << endGap << "\n";
   } else {
     startGap = std::abs(sorted[1].position.y - sorted[0].position.y);
     endGap = std::abs(sorted.back().position.y -
