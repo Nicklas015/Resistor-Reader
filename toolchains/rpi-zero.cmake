@@ -4,6 +4,9 @@ set(CMAKE_SYSTEM_PROCESSOR arm)
 set(TOOLCHAIN_PATH $ENV{HOME}/armv6-eabihf--glibc--stable-2025.08-1)
 set(CMAKE_C_COMPILER ${TOOLCHAIN_PATH}/bin/arm-linux-gcc)
 set(CMAKE_CXX_COMPILER ${TOOLCHAIN_PATH}/bin/arm-linux-g++)
+#set(CMAKE_C_COMPILER arm-linux-gnueabihf-gcc)
+#set(CMAKE_CXX_COMPILER arm-linux-gnueabihf-g++)
+#set(CMAKE_EXE_LINKER_FLAGS "-no-pie")
 
 set(PI_ROOTFS $ENV{HOME}/Resistor-Reader/rootfs)
 
