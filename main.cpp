@@ -8,11 +8,13 @@
 #include "line.h"
 #include "resistor_value.h"
 #include "take_photo.h"
+#include "led_driver.h"
 
 std::vector<line> resistor_lines;
 std::vector<std::string> band_positions;
 
 int main() {
+  led_driver(); // Blink the LED to indicate the program is running
   resistor_lines.clear();
   band_positions.clear();
 

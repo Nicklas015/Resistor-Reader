@@ -4,7 +4,12 @@ project(ResistorReader)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-include_directories(SYSTEM $ENV{HOME}/Resistor-Reader/rootfs/usr/include/opencv4)
+# 1. ADDED the rootfs /usr/include path here so gpiod.h is found
+include_directories(SYSTEM 
+    $ENV{HOME}/Resistor-Reader/rootfs/usr/include
+    $ENV{HOME}/Resistor-Reader/rootfs/usr/include/opencv4
+)
+
 set(OpenCV_DIR $ENV{HOME}/Resistor-Reader/rootfs/usr/lib/arm-linux-gnueabihf/cmake/opencv4)
 find_package(OpenCV REQUIRED)
 
@@ -13,6 +18,10 @@ find_library(LAPACK_LIB NAMES lapack PATHS $ENV{HOME}/Resistor-Reader/rootfs/usr
 find_library(ARMADILLO_LIB NAMES armadillo PATHS $ENV{HOME}/Resistor-Reader/rootfs/usr/lib/arm-linux-gnueabihf NO_DEFAULT_PATH)
 find_library(ARPACK_LIB NAMES arpack PATHS $ENV{HOME}/Resistor-Reader/rootfs/usr/lib/arm-linux-gnueabihf NO_DEFAULT_PATH)
 
+# 2. ADDED search for libgpiod in your rootfs   
+# Directly target the physical library file instead of the symlink
+set(GPIOD_LIB "$ENV{HOME}/Resistor-Reader/rootfs/usr/lib/arm-linux-gnueabihf/libgpiod.so.3.1.1")
+
 add_executable(resistor-reader 
     main.cpp
     color.cpp
@@ -20,6 +29,7 @@ add_executable(resistor-reader
     cluster.cpp
     resistor_value.cpp
     take_photo.cpp
+    led_driver.cpp
 )
 
 target_link_options(resistor-reader PRIVATE
@@ -36,6 +46,7 @@ target_link_libraries(resistor-reader
     ${ARPACK_LIB}
     ${BLAS_LIB}
     ${LAPACK_LIB}
+    ${GPIOD_LIB}   # 3. ADDED the gpiod library here
     m
     pthread
     dl
