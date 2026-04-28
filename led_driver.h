@@ -1,3 +1,4 @@
 #pragma once
  
-int led_driver(); // Function prototype for the LED driver
+int led_driver_init();
+int led_status (int status);

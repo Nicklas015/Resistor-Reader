@@ -12,13 +12,14 @@
 
 std::vector<line> resistor_lines;
 std::vector<std::string> band_positions;
-
+  
 int main() {
-  led_driver(); // Blink the LED to indicate the program is running
+  led_driver_init(); 
   resistor_lines.clear();
   band_positions.clear();
-
+  led_status(1); 
   take_photo();
+  led_status(0); 
 
   cv::Mat target = cv::imread("image/image.png");
 

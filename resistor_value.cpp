@@ -5,7 +5,7 @@
 void get_resistor_value(std::vector<std::string> band_positions) {
     
     if (band_positions.size() < 3) {
-        std::cout << "Not enough bands detected to determine resistor value." << std::endl;
+        std::cout << "Not enough bands detected to determine resistor value.\n";
         return;
     }
 
