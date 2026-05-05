@@ -21,7 +21,7 @@ int main() {
   take_photo();
   led_status(0); 
 
-  cv::Mat target = cv::imread("image/image.png");
+  cv::Mat target = cv::imread("image/image.jpg");
 
   if (target.empty()) {
     std::cerr << "ERROR: Could not load image.\n";

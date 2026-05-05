@@ -39,7 +39,7 @@ int led_driver_init() {
 }
 
 int led_status(int status) {
-    std::cout << "LED on GPIO " << pin_offset << "... Status: " << status << std::endl;
+    //std::cout << "LED on GPIO " << pin_offset << "... Status: " << status << std::endl;
 
     gpiod_line_value value = (status != 0) ? GPIOD_LINE_VALUE_ACTIVE : GPIOD_LINE_VALUE_INACTIVE;
     gpiod_line_request_set_value(request, pin_offset, value);
