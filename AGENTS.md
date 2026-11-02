@@ -40,6 +40,17 @@ Every pull request should include:
 - Tests and build results.
 - Known limitations or remaining issues.
 
+## Build Systems and Toolchains
+
+- For changes involving CMake, compiler toolchains, cross-compilation, sysroots, linker configuration or build environments, provide proposed changes only.
+- Do not directly modify build-system or toolchain files unless the repository owner explicitly authorizes it.
+- Present proposed changes as complete code blocks or unified diffs.
+- Explain why each change is necessary.
+- Identify assumptions about the host environment, target architecture and dependencies.
+- Provide exact commands for configuring and building.
+- The repository owner is responsible for applying and testing these changes on their development machine.
+- Wait for test results before proposing further corrections.
+
 ## Authority
 The repository owner is the final decision-maker.
 You may implement and propose changes, but only the repository owner may approve and merge pull requests.
